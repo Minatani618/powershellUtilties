@@ -3,12 +3,15 @@
 以下targetfolderに対象のフォルダを記入して
 このファイルを時間実行すると定期的に監視ログを吐く
  #>
-$targetFolder="C:\Users\minat\Desktop\programs"
+$targetFolder="C:\Users\ec000376\Desktop"
 
 $path = Get-Location
 $logFileName="watchingFileList.txt"
 $logFilePath=Join-Path -Path $path -ChildPath $logFileName
 $targetChildItems= Get-ChildItem $targetFolder
+
+<# 何秒ループかを起動時にユーザーに入れてもらう #>
+$intervalSeconds= read-host 何秒ループで監視しますか? 数字を入力してください。
 
 <# ログファイルの中身とフォルダ内アイテムを比較する#>
 function readLogFile() {
@@ -56,6 +59,9 @@ function writelogTime {
     Write-Output $time
 }
 
+while($true){
 writelogTime
 readLogFile
 writeLogFile
+Start-Sleep $intervalSeconds
+}
