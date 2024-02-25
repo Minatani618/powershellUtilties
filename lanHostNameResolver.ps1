@@ -5,7 +5,7 @@
 #>
 
 <# 検査したい拠点のセグメントを指定する #>
-$targetIP3Arr=@(11,60,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220)
+$targetIP3Arr=@(201,11,60,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220)
 
 <# レポートのパス #>
 $time= Get-Date -format "yyyyMMdd-HHmm"
@@ -15,18 +15,10 @@ $reportPath = $dirname.path + "\resolveReport_" + $time + ".csv"
 <# ipから名前解決する #>
 function resolveIP($ip) {
     try {
-        $result=Resolve-DnsName $ip -ErrorAction Stop <# resolve-dnsで存在しないとエラーとなり止まってしまうからtry-catch #>
-        $resultText= $ip +", "+$result.namehost
-        <# resolve-dnsnameの全戻り値を表記しようとするとなぜかエラーとなるためコメントアウト #>
-        <#$resultText= $result.name +", "
-        $resultText+= $result.type +", "
-        $resultText+= $result.TTL +", "
-        $resultText+= $result.Section +", "
-        $resultText+= $result.Namehost #>
-        return $resultText
+        return Resolve-DnsName $ip -ErrorAction Stop <# resolve-dnsで存在しないとエラーとなり止まってしまうからtry-catch #>
     }
     catch {
-        return $ip + ", not found"
+        return ""
     }
 }
 
@@ -45,8 +37,15 @@ foreach($targetIP3 in $targetIP3Arr ){
     for ($i = 1; $i -lt 255; $i++) {
         $ip1234=$ip123+$i
         $result = resolveIP $ip1234
+        <#$resultTxt <- IPアドレス, 結果 の形で出力したい #>
+        $resultTxt= $ip1234 + ","
+        if($result -eq ""){
+            $resultTxt+="-"
+        }else{
+            $resultTxt+=$result.namehost
+        }
         <# ファイル出力とコンソール出力 #>
-        Write-output $result >> $reportPath
-        write-output $result
+        Write-output $resultTxt >> $reportPath
+        write-output $resultTxt
     }
 }
